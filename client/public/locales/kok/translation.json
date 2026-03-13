@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "BengaluruDuru",
+    "tagline": "AI-आधारीत नागरी तक्रार मंच"
+  },
+  "nav": {
+    "home": "घर",
+    "file": "तक्रार करात",
+    "dashboard": "डॅशबोर्ड",
+    "officer": "म्हजीं कामां",
+    "login": "साइन इन",
+    "logout": "साइन आवट"
+  },
+  "auth": {
+    "title": "DigiLocker वरवीं साइन इन",
+    "aadhaar": "आधार नंबर",
+    "aadhaar_placeholder": "12-अंकी आधार घालात",
+    "name": "पुराय नांव",
+    "name_placeholder": "आधार कार्डाचेर आसा तशें",
+    "email": "ईमेल (वैकल्पीक)",
+    "phone": "फोन (वैकल्पीक)",
+    "send_otp": "OTP धाडात",
+    "verify_otp": "पडताळणी करून साइन इन",
+    "otp": "OTP",
+    "otp_placeholder": "6-अंकी OTP घालात",
+    "language": "भास",
+    "simulated_notice": "हें प्रात्यक्षीक हेतूंक सिम्युलेटेड DigiLocker प्रमाणीकरण. OTP वापरात: 123456",
+    "signing_in": "साइन इन जाता..."
+  },
+  "grievance": {
+    "describe": "तुमची समस्या तुमच्या उतरांनी सांगात...",
+    "describe_hint": "नेमके सांगात — जागो, समस्या कितें, आनी केन्ना सावन आसा.",
+    "upload_photo": "फोटो अपलोड करात (वैकल्पीक)",
+    "drop_photo": "वोडून सोडात वा अपलोड करपाक क्लिक करात",
+    "pin_location": "नकाशाचेर जागो दाखयात",
+    "submit": "धाडात",
+    "confirm_submit": "खात्री करून धाडात",
+    "analyzing": "AI तुमची तक्रार तपासता...",
+    "ai_result": "AI विश्लेषण",
+    "category": "वर्ग",
+    "subcategory": "उपवर्ग",
+    "priority": "प्राधान्य पांवडो",
+    "detected_location": "सापडिल्ली जागो",
+    "affected_too": "म्हाकाय ही समस्या आसा",
+    "impact_count": "{{count}} लोकांक असर जाला",
+    "verify": "निवारण खात्री करात",
+    "reopen": "निवारण जालें ना — परत उगडात",
+    "verification_window": "हें निवारण तपासपाक तुमकां {{hours}} वरां आसात",
+    "filed_by": "नोंदणी केल्लो",
+    "assigned_to": "नेमिल्लो",
+    "no_grievances": "तक्रारी मेळ्ळ्यो नात",
+    "file_new": "नवी समस्या कळयात",
+    "media_verified": "AI वरवीं फोटो तपासलो",
+    "media_unverified": "फोटो तपासपाक जालें ना"
+  },
+  "status": {
+    "open": "उगडें",
+    "assigned": "नेमिलां",
+    "in_progress": "चालू आसा",
+    "resolved_pending": "पडताळणी बाकी",
+    "resolved_final": "निवारण जालें",
+    "reopened": "परत उगडलां"
+  },
+  "priority_labels": {
+    "1": "उणें",
+    "2": "मध्यम",
+    "3": "चड",
+    "4": "तातडीचें",
+    "5": "खूब तातडीचें"
+  },
+  "categories": {
+    "Roads & Footpaths": "रस्ते आनी फूटपाथ",
+    "Water Supply": "उदका पुरवण",
+    "Sewage & Drainage": "गटार आनी निचरो",
+    "Garbage & Waste": "कोयर आनी कचरो",
+    "Street Lighting": "रस्त्याचो उजवाड",
+    "Parks & Open Spaces": "उद्यानां आनी मोकळ्यो जागो",
+    "Encroachment": "अतिक्रमण",
+    "Noise Pollution": "आवाज प्रदूशण",
+    "Traffic & Signals": "वाहतूक आनी सिग्नल",
+    "Public Transport (BMTC/Metro)": "सार्वजनीक वाहतूक",
+    "Building Violations": "बांदकाम उल्लंघन",
+    "Other": "हेर"
+  },
+  "dashboard": {
+    "title": "प्रशासक डॅशबोर्ड",
+    "total": "एकूण तक्रारी",
+    "open": "उगड्यो",
+    "resolved": "निवारण जाल्यो",
+    "avg_time": "सरासरी निवारण वेळ",
+    "hours": "वरां",
+    "alerts": "असामान्य सुचोवण्यो",
+    "no_alerts": "सक्रीय सुचोवण्यो नात",
+    "heatmap": "हीटम्याप",
+    "markers": "मार्कर"
+  },
+  "officer": {
+    "title": "म्हजीं कामां",
+    "upload_proof": "निवारण पुरावो अपलोड करात",
+    "select_photo": "पुरावो फोटो वेंचात",
+    "submit_proof": "निवारण पुरावो धाडात",
+    "no_assignments": "तुमकां तक्रारी नेमिल्ल्यो नात"
+  },
+  "tts": {
+    "speak": "वाचून सांगात",
+    "stop": "वाचप बंद करात",
+    "unsupported": "ह्या भाशेक उतर-आवाज उपलब्ध ना"
+  },
+  "common": {
+    "loading": "लोड जाता...",
+    "error": "कितेंतरी चुकलें",
+    "retry": "परत यत्न करात",
+    "back": "फाटीं",
+    "save": "सांबाळात",
+    "cancel": "रद्द",
+    "search": "सोदात...",
+    "filter": "फिल्टर",
+    "all": "सगळें",
+    "language": "भास"
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "BengaluruDuru",
+    "tagline": "AI-Powered Civic Grievance Platform"
+  },
+  "nav": {
+    "home": "Home",
+    "file": "Report Issue",
+    "dashboard": "Dashboard",
+    "officer": "My Assignments",
+    "login": "Sign In",
+    "logout": "Sign Out"
+  },
+  "auth": {
+    "title": "Sign in with DigiLocker",
+    "aadhaar": "Aadhaar Number",
+    "aadhaar_placeholder": "Enter 12-digit Aadhaar",
+    "name": "Full Name",
+    "name_placeholder": "As per Aadhaar card",
+    "email": "Email (Optional)",
+    "phone": "Phone (Optional)",
+    "send_otp": "Send OTP",
+    "verify_otp": "Verify & Sign In",
+    "otp": "OTP",
+    "otp_placeholder": "Enter 6-digit OTP",
+    "language": "Preferred Language",
+    "simulated_notice": "This is a simulated DigiLocker authentication for demonstration purposes. Use OTP: 123456",
+    "signing_in": "Signing in..."
+  },
+  "grievance": {
+    "describe": "Describe your issue in your own words...",
+    "describe_hint": "Be specific — mention the location, what the problem is, and how long it has been an issue.",
+    "upload_photo": "Upload a photo (optional)",
+    "drop_photo": "Drag & drop or click to upload",
+    "pin_location": "Pin the location on the map",
+    "submit": "Submit",
+    "confirm_submit": "Confirm & Submit",
+    "analyzing": "AI is analyzing your complaint...",
+    "ai_result": "AI Analysis",
+    "category": "Category",
+    "subcategory": "Subcategory",
+    "priority": "Priority Level",
+    "detected_location": "Detected Location",
+    "affected_too": "I'm affected too",
+    "impact_count": "{{count}} people affected",
+    "verify": "Confirm Resolved",
+    "reopen": "Not Resolved — Reopen",
+    "verification_window": "You have {{hours}} hours to verify this fix",
+    "filed_by": "Filed by",
+    "assigned_to": "Assigned to",
+    "no_grievances": "No grievances found",
+    "file_new": "Report a New Issue",
+    "media_verified": "Photo verified by AI",
+    "media_unverified": "Photo could not be verified"
+  },
+  "status": {
+    "open": "Open",
+    "assigned": "Assigned",
+    "in_progress": "In Progress",
+    "resolved_pending": "Pending Verification",
+    "resolved_final": "Resolved",
+    "reopened": "Reopened"
+  },
+  "priority_labels": {
+    "1": "Low",
+    "2": "Moderate",
+    "3": "High",
+    "4": "Urgent",
+    "5": "Critical"
+  },
+  "categories": {
+    "Roads & Footpaths": "Roads & Footpaths",
+    "Water Supply": "Water Supply",
+    "Sewage & Drainage": "Sewage & Drainage",
+    "Garbage & Waste": "Garbage & Waste",
+    "Street Lighting": "Street Lighting",
+    "Parks & Open Spaces": "Parks & Open Spaces",
+    "Encroachment": "Encroachment",
+    "Noise Pollution": "Noise Pollution",
+    "Traffic & Signals": "Traffic & Signals",
+    "Public Transport (BMTC/Metro)": "Public Transport (BMTC/Metro)",
+    "Building Violations": "Building Violations",
+    "Other": "Other"
+  },
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "total": "Total Grievances",
+    "open": "Open",
+    "resolved": "Resolved",
+    "avg_time": "Avg Resolution Time",
+    "hours": "hours",
+    "alerts": "Anomaly Alerts",
+    "no_alerts": "No active alerts",
+    "heatmap": "Heatmap View",
+    "markers": "Marker View"
+  },
+  "officer": {
+    "title": "My Assignments",
+    "upload_proof": "Upload Proof of Fix",
+    "select_photo": "Select proof photo",
+    "submit_proof": "Submit Resolution Proof",
+    "no_assignments": "No grievances assigned to you"
+  },
+  "tts": {
+    "speak": "Read Aloud",
+    "stop": "Stop Reading",
+    "unsupported": "Text-to-speech is not available for this language"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search...",
+    "filter": "Filter",
+    "all": "All",
+    "language": "Language"
+  }
+}

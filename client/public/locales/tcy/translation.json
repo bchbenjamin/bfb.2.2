@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "BengaluruDuru",
+    "tagline": "AI-ಚಾಲಿತ ನಾಗರಿಕ ದೂರು ವೇದಿಕೆ"
+  },
+  "nav": {
+    "home": "ಇಲ್ಲ್",
+    "file": "ದೂರು ಕೊಡ್ಲೆ",
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "officer": "ಎನ್ನ ಕೆಲಸೊಲು",
+    "login": "ಸೈನ್ ಇನ್",
+    "logout": "ಸೈನ್ ಔಟ್"
+  },
+  "auth": {
+    "title": "DigiLocker ಮೂಲಕ ಸೈನ್ ಇನ್",
+    "aadhaar": "ಆಧಾರ್ ಸಂಖ್ಯೆ",
+    "aadhaar_placeholder": "12-ಅಂಕಿಯ ಆಧಾರ್ ಹಾಕ್ಲೆ",
+    "name": "ಪೂರ್ತಿ ಪೆದರ್",
+    "name_placeholder": "ಆಧಾರ್ ಕಾರ್ಡ್‌ಡ್ ಇಪ್ಪುನಂಚ",
+    "email": "ಇಮೇಲ್ (ಐಚ್ಛಿಕ)",
+    "phone": "ಫೋನ್ (ಐಚ್ಛಿಕ)",
+    "send_otp": "OTP ಕಳುಪುಲೆ",
+    "verify_otp": "ಪರಿಶೀಲನೆ ಮಾಡ್ಲೆ",
+    "otp": "OTP",
+    "otp_placeholder": "6-ಅಂಕಿಯ OTP ಹಾಕ್ಲೆ",
+    "language": "ಭಾಷೆ",
+    "simulated_notice": "ಉಂದು ಪ್ರದರ್ಶನಗಾದ್ ಸಿಮ್ಯುಲೇಟೆಡ್ DigiLocker. OTP: 123456",
+    "signing_in": "ಸೈನ್ ಇನ್ ಆವೊಂದು..."
+  },
+  "grievance": {
+    "describe": "ನಿಕ್ಲೆನ ಸಮಸ್ಯೆನ್ ನಿಕ್ಲೆನ ಮಾತ್‌ಡ್ ಪಣ್ಲೆ...",
+    "describe_hint": "ನಿರ್ದಿಷ್ಟವಾದ್ ಇಪ್ಪುಲೆ — ಎಡೆ, ಸಮಸ್ಯೆ ದಾದ, ಮತ್ತು ಎಂಚ ಸಮಯೋಡ್ದು ಇತ್ತ್ ಪಣ್ಲೆ.",
+    "upload_photo": "ಫೋಟೋ ಹಾಕ್ಲೆ (ಐಚ್ಛಿಕ)",
+    "drop_photo": "ಎಳದ್ ಬುಡ್ಲೆ ಅತ್ತ್ ಅಪ್‌ಲೋಡ್ ಮಾಡ್ಲೆ ಕ್ಲಿಕ್ ಮಾಡ್ಲೆ",
+    "pin_location": "ನಕ್ಷೆಡ್ ಎಡೆ ಗುರುತ್ ಮಾಡ್ಲೆ",
+    "submit": "ಕಳುಪುಲೆ",
+    "confirm_submit": "ದೃಢೀಕರಿಸ್‌ದ್ ಕಳುಪುಲೆ",
+    "analyzing": "AI ನಿಕ್ಲೆನ ದೂರುನ್ ನೋಡೊಂದುಂಡು...",
+    "ai_result": "AI ವಿಶ್ಲೇಷಣೆ",
+    "category": "ವರ್ಗ",
+    "subcategory": "ಉಪವರ್ಗ",
+    "priority": "ಆದ್ಯತೆ",
+    "detected_location": "ಪತ್ತೆಯಾಯಿನ ಎಡೆ",
+    "affected_too": "ಎಂಕ್‌ಲ ಈ ಸಮಸ್ಯೆ ಉಂಡು",
+    "impact_count": "{{count}} ಜನಕ್ಲೆಗ್ ಪ್ರಭಾವ ಆತ್",
+    "verify": "ಪರಿಹಾರ ದೃಢೀಕರಿಸ್ಲೆ",
+    "reopen": "ಪರಿಹಾರ ಆಯಿಜಿ — ಮರಲ ತೆರೆಲೆ",
+    "verification_window": "ಈ ಪರಿಹಾರ ಪರಿಶೀಲಿಸ್‌ಲೆ ನಿಕ್ಲೆಗ್ {{hours}} ಗಂಟೆ ಉಂಡು",
+    "filed_by": "ದಾಖಲೆ ಮಾಡ್‌ನಕುಲು",
+    "assigned_to": "ನಿಯೋಜಿಸಾತ್",
+    "no_grievances": "ದೂರುಲು ತಿಕ್ಕಿಜಿ",
+    "file_new": "ಪೊಸ ಸಮಸ್ಯೆ ವರದಿ ಮಾಡ್ಲೆ",
+    "media_verified": "AI ಮೂಲಕ ಫೋಟೋ ಪರಿಶೀಲಿಸಾತ್",
+    "media_unverified": "ಫೋಟೋ ಪರಿಶೀಲಿಸ್‌ಲೆ ಆಯಿಜಿ"
+  },
+  "status": {
+    "open": "ತೆರೆದುಂಡು",
+    "assigned": "ನಿಯೋಜಿಸಾತ್",
+    "in_progress": "ನಡೆಯೊಂದುಂಡು",
+    "resolved_pending": "ಪರಿಶೀಲನೆ ಬಾಕಿ",
+    "resolved_final": "ಪರಿಹಾರ ಆತ್",
+    "reopened": "ಮರಲ ತೆರೆತ್"
+  },
+  "priority_labels": {
+    "1": "ಕಡಿಮೆ",
+    "2": "ಮಧ್ಯಮ",
+    "3": "ಜಾಸ್ತಿ",
+    "4": "ತುರ್ತು",
+    "5": "ಬಾರಿ ತುರ್ತು"
+  },
+  "categories": {
+    "Roads & Footpaths": "ರಸ್ತೆಲು ಮತ್ತು ಫುಟ್‌ಪಾತ್",
+    "Water Supply": "ನೀರ್ ಸರಬರಾಜು",
+    "Sewage & Drainage": "ಒಳಚರಂಡಿ",
+    "Garbage & Waste": "ಕಸ ಮತ್ತು ತ್ಯಾಜ್ಯ",
+    "Street Lighting": "ಬೀದಿ ದೀಪ",
+    "Parks & Open Spaces": "ಉದ್ಯಾನ ಮತ್ತು ತೆರೆದ ಎಡೆ",
+    "Encroachment": "ಅತಿಕ್ರಮಣ",
+    "Noise Pollution": "ಶಬ್ದ ಮಾಲಿನ್ಯ",
+    "Traffic & Signals": "ಟ್ರಾಫಿಕ್ ಮತ್ತು ಸಿಗ್ನಲ್",
+    "Public Transport (BMTC/Metro)": "ಸಾರ್ವಜನಿಕ ಸಾರಿಗೆ",
+    "Building Violations": "ಕಟ್ಟಡ ಉಲ್ಲಂಘನೆ",
+    "Other": "ಬೇತೆ"
+  },
+  "dashboard": {
+    "title": "ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "total": "ಒಟ್ಟು ದೂರುಲು",
+    "open": "ತೆರೆದುಂಡು",
+    "resolved": "ಪರಿಹಾರ ಆತ್",
+    "avg_time": "ಸರಾಸರಿ ಪರಿಹಾರ ಸಮಯ",
+    "hours": "ಗಂಟೆಲು",
+    "alerts": "ಅಸಾಮಾನ್ಯ ಎಚ್ಚರಿಕೆಲು",
+    "no_alerts": "ಸಕ್ರಿಯ ಎಚ್ಚರಿಕೆಲು ಇಜ್ಜಿ",
+    "heatmap": "ಹೀಟ್‌ಮ್ಯಾಪ್",
+    "markers": "ಮಾರ್ಕರ್"
+  },
+  "officer": {
+    "title": "ಎನ್ನ ಕೆಲಸೊಲು",
+    "upload_proof": "ಪರಿಹಾರ ಸಾಕ್ಷ್ಯ ಅಪ್‌ಲೋಡ್",
+    "select_photo": "ಸಾಕ್ಷ್ಯ ಫೋಟೋ ಆರಿಸ್ಲೆ",
+    "submit_proof": "ಪರಿಹಾರ ಸಾಕ್ಷ್ಯ ಕಳುಪುಲೆ",
+    "no_assignments": "ನಿಕ್ಲೆಗ್ ದೂರುಲು ನಿಯೋಜಿಸಾತಿಜಿ"
+  },
+  "tts": {
+    "speak": "ಓದ್ ಪಣ್ಲೆ",
+    "stop": "ಓದುನ ನಿಲ್ಲಿಸ್ಲೆ",
+    "unsupported": "ಈ ಭಾಷೆಗ್ ಪಠ್ಯ-ಧ್ವನಿ ಲಭ್ಯ ಇಜ್ಜಿ"
+  },
+  "common": {
+    "loading": "ಲೋಡ್ ಆವೊಂದುಂಡು...",
+    "error": "ದಾದೋ ತಪ್ಪಾಂಡ್",
+    "retry": "ಮರಲ ಪ್ರಯತ್ನ ಮಾಡ್ಲೆ",
+    "back": "ಪಿರ",
+    "save": "ಉಳಿಸ್ಲೆ",
+    "cancel": "ರದ್ದು",
+    "search": "ನಾಡ್ಲೆ...",
+    "filter": "ಫಿಲ್ಟರ್",
+    "all": "ಮಾತೆರ",
+    "language": "ಭಾಷೆ"
+  }
+}
