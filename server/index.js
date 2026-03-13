@@ -12,7 +12,7 @@ import alertRoutes from './routes/alerts.js';
 import dashboardRoutes from './routes/dashboard.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
-dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '..', '.env') });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,8 +32,10 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'bengalur
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`BengaluruDuru API running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`BengaluruDuru API running on port ${PORT}`);
+  });
+}
 
 export default app;
