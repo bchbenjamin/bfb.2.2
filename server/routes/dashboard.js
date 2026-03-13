@@ -2,12 +2,15 @@ import { Router } from 'express';
 import sql from '../db/pool.js';
 import { authenticate } from '../middleware/auth.js';
 import { roleGuard } from '../middleware/roleGuard.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
 // GET /api/dashboard/stats — Overview statistics
 router.get('/stats', authenticate, roleGuard('admin', 'officer'), async (req, res, next) => {
   try {
+    logger.debug('Fetching dashboard stats', { userId: req.user.id });
+
     const stats = await sql`
       SELECT
         COUNT(*)::int AS total,
@@ -37,12 +40,14 @@ router.get('/stats', authenticate, roleGuard('admin', 'officer'), async (req, re
       LIMIT 10
     `;
 
+    logger.info('Dashboard stats returned', { total: stats[0]?.total });
     res.json({
       ...stats[0],
       categories: categoryBreakdown,
       wards: wardBreakdown,
     });
   } catch (err) {
+    logger.error('Dashboard stats query failed', { error: err.message });
     next(err);
   }
 });
@@ -50,13 +55,16 @@ router.get('/stats', authenticate, roleGuard('admin', 'officer'), async (req, re
 // GET /api/dashboard/heatmap — Heatmap intensity data
 router.get('/heatmap', authenticate, async (req, res, next) => {
   try {
+    logger.debug('Fetching heatmap data');
     const result = await sql`
       SELECT latitude, longitude, ai_priority AS intensity
       FROM grievances
       WHERE status NOT IN ('resolved_final')
     `;
+    logger.info('Heatmap data returned', { count: result.length });
     res.json(result);
   } catch (err) {
+    logger.error('Heatmap query failed', { error: err.message });
     next(err);
   }
 });
@@ -64,6 +72,7 @@ router.get('/heatmap', authenticate, async (req, res, next) => {
 // GET /api/dashboard/officers — List officers for assignment
 router.get('/officers', authenticate, roleGuard('admin'), async (req, res, next) => {
   try {
+    logger.debug('Fetching officers list');
     const result = await sql`
       SELECT u.id, u.name, u.ward,
         COUNT(g.id)::int FILTER (WHERE g.status NOT IN ('resolved_final', 'resolved_pending')) AS active_cases
@@ -73,8 +82,10 @@ router.get('/officers', authenticate, roleGuard('admin'), async (req, res, next)
       GROUP BY u.id, u.name, u.ward
       ORDER BY u.name
     `;
+    logger.info('Officers listed', { count: result.length });
     res.json(result);
   } catch (err) {
+    logger.error('Officers query failed', { error: err.message });
     next(err);
   }
 });

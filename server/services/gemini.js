@@ -5,6 +5,7 @@ import {
   RESOLUTION_VERIFICATION_PROMPT,
 } from '../utils/aiPrompts.js';
 import { AI_DEFAULTS } from '../utils/constants.js';
+import { logger } from '../utils/logger.js';
 
 let model = null;
 
@@ -18,19 +19,23 @@ function getModel() {
         temperature: 0.1,
       },
     });
+    logger.info('Gemini model initialized');
   }
   return model;
 }
 
 export async function categorizeGrievance(rawDescription) {
   try {
+    logger.debug('Gemini: categorizing grievance', { descriptionLength: rawDescription.length });
     const result = await getModel().generateContent(
       CATEGORIZATION_PROMPT + rawDescription
     );
     const text = result.response.text();
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    logger.info('Gemini: categorization success', { category: parsed.category, priority: parsed.priority });
+    return parsed;
   } catch (err) {
-    console.error('Gemini categorization failed:', err.message);
+    logger.error('Gemini categorization failed', { error: err.message });
     return {
       category: AI_DEFAULTS.category,
       subcategory: AI_DEFAULTS.subcategory,
@@ -44,14 +49,17 @@ export async function categorizeGrievance(rawDescription) {
 
 export async function verifyMedia(imageBase64, mimeType, description) {
   try {
+    logger.debug('Gemini: verifying media against description');
     const prompt = MEDIA_VERIFICATION_PROMPT.replace('{description}', description);
     const result = await getModel().generateContent([
       { inlineData: { data: imageBase64, mimeType } },
       { text: prompt },
     ]);
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    logger.info('Gemini: media verification result', { matches: parsed.matches_description });
+    return parsed;
   } catch (err) {
-    console.error('Gemini media verification failed:', err.message);
+    logger.error('Gemini media verification failed', { error: err.message });
     return { matches_description: true, confidence: 0, reasoning: 'AI verification unavailable' };
   }
 }
@@ -64,6 +72,7 @@ export async function verifyResolution(
   originalDescription
 ) {
   try {
+    logger.debug('Gemini: verifying resolution proof');
     const prompt = RESOLUTION_VERIFICATION_PROMPT.replace('{description}', originalDescription);
     const parts = [
       { inlineData: { data: originalImageBase64, mimeType: originalMime } },
@@ -71,9 +80,11 @@ export async function verifyResolution(
       { text: prompt },
     ];
     const result = await getModel().generateContent(parts);
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    logger.info('Gemini: resolution verification result', { matchScore: parsed.match_score });
+    return parsed;
   } catch (err) {
-    console.error('Gemini resolution verification failed:', err.message);
+    logger.error('Gemini resolution verification failed', { error: err.message });
     return { appears_resolved: false, match_score: 0, reasoning: 'AI verification unavailable' };
   }
 }

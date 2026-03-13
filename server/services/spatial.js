@@ -1,8 +1,11 @@
 import sql from '../db/pool.js';
 import { SPATIAL_BUFFER_RADIUS, SPATIAL_THRESHOLD, SPATIAL_WINDOW_HOURS } from '../utils/constants.js';
+import { logger } from '../utils/logger.js';
 
 export async function checkSpatialBuffer(category, latitude, longitude) {
   try {
+    logger.debug('Spatial buffer check', { category, latitude, longitude });
+
     const result = await sql`
       SELECT COUNT(*)::int AS count,
              AVG(latitude) AS center_lat,
@@ -22,6 +25,7 @@ export async function checkSpatialBuffer(category, latitude, longitude) {
     `;
 
     const { count, center_lat, center_lng } = result[0];
+    logger.info('Spatial buffer result', { category, count, threshold: SPATIAL_THRESHOLD });
 
     if (count >= SPATIAL_THRESHOLD) {
       const severity = count >= SPATIAL_THRESHOLD * 2 ? 'critical' : 'warning';
@@ -32,12 +36,13 @@ export async function checkSpatialBuffer(category, latitude, longitude) {
         VALUES (${category}, ${center_lat}, ${center_lng}, ${count}, ${message}, ${severity})
       `;
 
+      logger.warn('Spatial alert created', { severity, count, category });
       return { count, isAlert: true, severity, message };
     }
 
     return { count, isAlert: false };
   } catch (err) {
-    console.error('Spatial buffer check failed:', err.message);
+    logger.error('Spatial buffer check failed', { error: err.message, category });
     return { count: 0, isAlert: false };
   }
 }
