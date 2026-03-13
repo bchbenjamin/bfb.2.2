@@ -32,8 +32,10 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'bengalur
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`BengaluruDuru API running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`BengaluruDuru API running on port ${PORT}`);
+  });
+}
 
 export default app;
