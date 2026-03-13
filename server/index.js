@@ -12,8 +12,10 @@ import alertRoutes from './routes/alerts.js';
 import dashboardRoutes from './routes/dashboard.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
-dotenv.config();
-
+// Load .env relative to this file's directory (server/)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
