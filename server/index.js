@@ -12,7 +12,7 @@ import alertRoutes from './routes/alerts.js';
 import dashboardRoutes from './routes/dashboard.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
-dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '..', '.env') });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
