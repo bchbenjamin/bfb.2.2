@@ -27,6 +27,9 @@ export async function seedDB() {
   const seed = await readFile(seedPath, 'utf-8');
   const statements = seed.split(/;\s*$/m).filter(s => s.trim());
   for (const stmt of statements) {
+    console.log('EXECUTING STATEMENT:');
+    console.log(stmt);
+    console.log('--------------------');
     await sql(stmt);
   }
   console.log('Database seeded successfully');
