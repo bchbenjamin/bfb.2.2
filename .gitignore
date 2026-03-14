@@ -7,8 +7,9 @@ dist/
 .env.local
 .env.production
 
-# Documentation (local only)
-Modules/
+# [OLD] Documentation guides
+Deployment.md
+images.md
 
 # Uploads
 uploads/
