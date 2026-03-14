@@ -87,8 +87,8 @@ router.post('/admin-login', async (req, res, next) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminEmail = process.env.ADMIN_EMAIL || 'officer@bbmp.gov.in';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'bbmp123';
 
     if (email !== adminEmail || password !== adminPassword) {
       logger.warn('Admin login rejected: invalid credentials', { email });

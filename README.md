@@ -135,8 +135,8 @@ We built BengaluruDuru because we believe technology should serve the public goo
 <!-- INSTRUCTION: Replace these LinkedIn URLs with your actual profile links! -->
 
 <div align="center">
-  <a href="[INSERT_YOUR_LINKEDIN_URL]">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect_with_Benjamin-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
+  <a href="https://www.linkedin.com/posts/bchbenjamin_bengaluru-govtech-datascience-ugcPost-7438483657247432704-wsnl">
+    <img src="https://img.shields.io/badge/LinkedIn-Post_About_Project-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
   </a>
 </div>
 
