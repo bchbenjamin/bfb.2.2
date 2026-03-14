@@ -14,9 +14,6 @@
   <a href="https://github.com/bchbenjamin/bfb.2.2/issues">
     <img src="https://img.shields.io/github/issues/bchbenjamin/bfb.2.2?style=for-the-badge&color=e74c3c" alt="Issues" />
   </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT" />
-  </a>
 </div>
 
 <br />
@@ -32,10 +29,16 @@ TEAM INSTRUCTIONS FOR MEDIA:
 ## 🎬 See it in Action / ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ನೋಡಿ
 
 <div align="center">
-  <a href="[INSERT_YOUTUBE_LINK_HERE]">
-    <img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg" alt="Watch the Demo Video" width="800" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  <a href="https://bengaluruduru.vercel.app/">
+    <img src="https://img.shields.io/badge/Link-to_access_the_project-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
   </a>
-  <p><i>Click the image above to watch the pitch & demo! <br> ಪಿಚ್ ಮತ್ತು ಡೆಮೊ ವೀಕ್ಷಿಸಲು ಮೇಲಿನ ಚಿತ್ರವನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ!</i></p>
+</div>
+
+<div align="center">
+  <a href="https://youtu.be/bbNTjIc-PXg">
+    <img src="readme_uploads/yt_thumbnail.jpg" alt="Watch the Demo Video" width="800" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  </a>
+  <p><i>Click the image above to watch the demo! <br> ಪಿಚ್ ಮತ್ತು ಡೆಮೊ ವೀಕ್ಷಿಸಲು ಮೇಲಿನ ಚಿತ್ರವನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ!</i></p>
 </div>
 
 ---
