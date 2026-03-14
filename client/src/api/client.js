@@ -14,7 +14,8 @@ export async function apiFetch(path, options = {}) {
 
   const response = await fetch(`${BASE_URL}${path}`, { ...options, headers });
 
-  if (response.status === 401) {
+  // Do not redirect on 401 for login or the initial /me check
+  if (response.status === 401 && !path.includes('/login') && !path.includes('/api/auth/me')) {
     localStorage.removeItem('token');
     window.location.href = '/login';
     throw new Error('Session expired');

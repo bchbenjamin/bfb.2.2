@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import sql from '../db/pool.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -8,17 +9,21 @@ const router = Router();
 router.post('/login', async (req, res, next) => {
   try {
     const { aadhaar_id, name, email, phone, otp, language_pref } = req.body;
+    logger.info('Login attempt', { aadhaar_id, name });
 
     if (!aadhaar_id || !name) {
+      logger.warn('Login rejected: missing aadhaar_id or name');
       return res.status(400).json({ error: 'Aadhaar ID and name are required' });
     }
 
     if (!/^\d{12}$/.test(aadhaar_id)) {
+      logger.warn('Login rejected: invalid aadhaar format', { aadhaar_id });
       return res.status(400).json({ error: 'Aadhaar ID must be 12 digits' });
     }
 
     // Simulated OTP verification — always accepts "123456"
     if (otp && otp !== '123456') {
+      logger.warn('Login rejected: invalid OTP');
       return res.status(400).json({ error: 'Invalid OTP' });
     }
 
@@ -32,6 +37,7 @@ router.post('/login', async (req, res, next) => {
     `;
 
     const user = result[0];
+    logger.info('User authenticated', { userId: user.id, role: user.role });
 
     const token = jwt.sign(
       { id: user.id, name: user.name, role: user.role, language_pref: user.language_pref },
@@ -41,6 +47,7 @@ router.post('/login', async (req, res, next) => {
 
     res.json({ token, user });
   } catch (err) {
+    logger.error('Login failed', { error: err.message, stack: err.stack });
     next(err);
   }
 });
@@ -54,14 +61,61 @@ router.get('/me', async (req, res, next) => {
     }
 
     const payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+    logger.debug('Token verified for /me', { userId: payload.id });
+
     const result = await sql`SELECT id, name, role, language_pref, ward, email FROM users WHERE id = ${payload.id}`;
 
     if (!result[0]) {
+      logger.warn('User not found for valid token', { userId: payload.id });
       return res.status(404).json({ error: 'User not found' });
     }
 
     res.json(result[0]);
   } catch (err) {
+    logger.error('Auth /me failed', { error: err.message });
+    next(err);
+  }
+});
+
+// POST /api/auth/admin-login — Email/password login for officers/admins
+router.post('/admin-login', async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    logger.info('Admin login attempt', { email });
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'officer@bbmp.gov.in';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'bbmp123';
+
+    if (email !== adminEmail || password !== adminPassword) {
+      logger.warn('Admin login rejected: invalid credentials', { email });
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Upsert officer user using a fixed aadhaar for the admin account
+    const result = await sql`
+      INSERT INTO users (aadhaar_id, name, email, role)
+      VALUES ('999999999999', 'BBMP Officer', ${email}, 'officer')
+      ON CONFLICT (aadhaar_id)
+      DO UPDATE SET email = EXCLUDED.email
+      RETURNING id, name, role, language_pref, ward, email
+    `;
+
+    const user = result[0];
+    logger.info('Admin authenticated', { userId: user.id, role: user.role });
+
+    const token = jwt.sign(
+      { id: user.id, name: user.name, role: user.role, language_pref: user.language_pref },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({ token, user });
+  } catch (err) {
+    logger.error('Admin login failed', { error: err.message, stack: err.stack });
     next(err);
   }
 });

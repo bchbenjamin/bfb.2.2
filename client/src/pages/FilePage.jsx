@@ -2,13 +2,12 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { Upload, Send, Loader2, MapPin, CheckCircle, Edit3 } from 'lucide-react';
+import { Upload, Send, MapPin, CheckCircle, Search } from 'lucide-react';
 import { apiFetch } from '../api/client.js';
 import { useGeolocation } from '../hooks/useGeolocation.js';
 import Button from '../components/ui/Button.jsx';
 import Textarea from '../components/ui/Textarea.jsx';
 import Card from '../components/ui/Card.jsx';
-import Badge from '../components/ui/Badge.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import { BENGALURU_CENTER, TILE_URLS, TILE_ATTRIBUTION } from '../utils/constants.js';
 
@@ -31,25 +30,26 @@ export default function FilePage() {
   const [media, setMedia] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [pin, setPin] = useState(null);
-  const [step, setStep] = useState('input'); // input -> analyzing -> confirm -> submitting -> done
-  const [aiResult, setAiResult] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   function handleFileSelect(e) {
     const file = e.target.files?.[0];
     if (file) {
       setMedia(file);
       setMediaPreview(URL.createObjectURL(file));
+      setError('');
     }
   }
 
-  async function handleAnalyze(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!description.trim()) { setError('Please describe the issue'); return; }
     const loc = pin || geoPos;
     if (!loc) { setError('Please pin a location on the map'); return; }
 
-    setStep('analyzing');
+    setSubmitting(true);
     setError('');
 
     try {
@@ -59,85 +59,57 @@ export default function FilePage() {
       formData.append('longitude', loc.lng);
       if (media) formData.append('media', media);
 
-      const data = await apiFetch('/api/grievances', {
+      // Submit directly. The backend runs AI categorization and media verification internally.
+      await apiFetch('/api/grievances', {
         method: 'POST',
         body: formData,
-        headers: {}, // Let browser set multipart boundary
+        headers: {},
       });
 
-      setAiResult(data);
-      setStep('done');
+      setSuccess(true);
     } catch (err) {
       setError(err.message);
-      setStep('input');
+    } finally {
+      setSubmitting(false);
     }
   }
 
   const mapCenter = pin ? [pin.lat, pin.lng] : geoPos ? [geoPos.lat, geoPos.lng] : BENGALURU_CENTER;
 
-  if (step === 'analyzing') {
+  if (submitting) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-128px)] gap-4">
         <Spinner size="lg" />
-        <p className="text-on-surface-variant text-lg">{t('grievance.analyzing')}</p>
+        <p className="text-on-surface-variant text-lg">
+          Submitting grievance and running AI analysis...
+        </p>
       </div>
     );
   }
 
-  if (step === 'done' && aiResult) {
-    const g = aiResult.grievance;
-    const ai = aiResult.ai_analysis;
+  if (success) {
     return (
       <div className="max-w-2xl mx-auto p-4 py-8">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={32} className="text-success" />
+          <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={40} className="text-success" />
           </div>
-          <h2 className="text-2xl font-bold text-on-surface">Grievance Filed Successfully</h2>
+          <h2 className="text-2xl font-bold text-on-surface mb-2">Grievance Filed Successfully!</h2>
+          <p className="text-on-surface-variant">
+            Our AI has automatically categorized your issue and routed it to the correct department.
+          </p>
         </div>
 
-        <Card className="p-6 space-y-4">
-          <h3 className="font-semibold text-lg text-on-surface">{g.title}</h3>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-xs text-on-surface-variant">{t('grievance.category')}</span>
-              <p className="font-medium text-on-surface">{ai.category}</p>
-            </div>
-            <div>
-              <span className="text-xs text-on-surface-variant">{t('grievance.subcategory')}</span>
-              <p className="font-medium text-on-surface">{ai.subcategory}</p>
-            </div>
-            <div>
-              <span className="text-xs text-on-surface-variant">{t('grievance.priority')}</span>
-              <Badge color={ai.priority >= 4 ? 'error' : ai.priority >= 3 ? 'warning' : 'info'}>
-                {t(`priority_labels.${ai.priority}`)} ({ai.priority}/5)
-              </Badge>
-            </div>
-            <div>
-              <span className="text-xs text-on-surface-variant">{t('grievance.detected_location')}</span>
-              <p className="font-medium text-on-surface">{ai.detected_location || 'N/A'}</p>
-            </div>
-          </div>
-
-          {aiResult.media_verified !== undefined && (
-            <p className={`text-sm ${aiResult.media_verified ? 'text-success' : 'text-warning'}`}>
-              {aiResult.media_verified ? t('grievance.media_verified') : t('grievance.media_unverified')}
-            </p>
-          )}
-
-          {aiResult.spatial_alert && (
-            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-sm text-yellow-800 dark:text-yellow-300">
-              ⚠️ {aiResult.spatial_alert.message}
-            </div>
-          )}
-
-          <div className="flex gap-3 pt-4">
-            <Button variant="outlined" onClick={() => navigate('/')} className="flex-1">
+        <Card className="p-6 text-center space-y-6">
+          <p className="text-sm text-on-surface-variant">
+            You can track the resolution status from your dashboard.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Button variant="outlined" onClick={() => navigate('/')} className="w-full sm:w-auto">
               {t('nav.home')}
             </Button>
-            <Button onClick={() => navigate(`/grievance/${g.id}`)} className="flex-1">
-              View Grievance
+            <Button onClick={() => { setSuccess(false); setDescription(''); setMedia(null); setMediaPreview(null); }} className="w-full sm:w-auto">
+              File Another Issue
             </Button>
           </div>
         </Card>
@@ -147,38 +119,47 @@ export default function FilePage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 py-8">
-      <h1 className="text-2xl font-bold text-on-surface mb-2">{t('nav.file')}</h1>
-      <p className="text-on-surface-variant mb-6">{t('grievance.describe_hint')}</p>
+      <h1 className="text-3xl font-bold text-on-surface mb-2">{t('nav.file')}</h1>
+      <p className="text-on-surface-variant mb-8 text-lg">{t('grievance.describe_hint')}</p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-error rounded-xl text-sm">{error}</div>
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-error rounded-2xl text-sm border border-red-200 dark:border-red-800/30 font-medium">
+          {error}
+        </div>
       )}
 
-      <form onSubmit={handleAnalyze} className="space-y-6">
-        <Textarea
-          label={t('grievance.describe').replace('...', '')}
-          placeholder={t('grievance.describe')}
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          rows={5}
-          required
-        />
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <Card className="p-6 shadow-md border-0">
+          <label className="text-sm font-semibold text-on-surface mb-3 block">
+            What's the issue?
+          </label>
+          <Textarea
+            placeholder={t('grievance.describe')}
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            rows={5}
+            required
+            className="text-lg bg-surface placeholder:text-outline/60"
+          />
+        </Card>
 
         {/* Photo upload */}
-        <div>
-          <label className="text-sm font-medium text-on-surface-variant mb-2 block">
-            {t('grievance.upload_photo')}
+        <Card className="p-6 shadow-md border-0">
+          <label className="text-sm font-semibold text-on-surface mb-3 flex justify-between items-center">
+            <span>{t('grievance.upload_photo')}</span>
+            <span className="text-xs font-normal text-on-surface-variant bg-surface-container px-2 py-1 rounded-md">Optional</span>
           </label>
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-outline-variant rounded-2xl p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+            className="border-2 border-dashed border-primary/30 bg-primary/5 rounded-2xl p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/10 transition-all group"
           >
             {mediaPreview ? (
-              <img src={mediaPreview} alt="Preview" className="max-h-48 mx-auto rounded-xl" />
+              <img src={mediaPreview} alt="Preview" className="max-h-56 mx-auto rounded-xl shadow-lg border border-outline-variant/30" />
             ) : (
-              <div className="text-on-surface-variant">
-                <Upload size={32} className="mx-auto mb-2 opacity-50" />
-                <p className="text-sm">{t('grievance.drop_photo')}</p>
+              <div className="text-primary/80 group-hover:text-primary transition-colors">
+                <Upload size={40} className="mx-auto mb-3" />
+                <p className="font-medium">{t('grievance.drop_photo')}</p>
+                <p className="text-xs mt-1 text-on-surface-variant">JPG, PNG, WEBP (Max 5MB)</p>
               </div>
             )}
           </div>
@@ -189,29 +170,32 @@ export default function FilePage() {
             onChange={handleFileSelect}
             className="hidden"
           />
-        </div>
+        </Card>
 
         {/* Map pin */}
-        <div>
-          <label className="text-sm font-medium text-on-surface-variant mb-2 flex items-center gap-2">
-            <MapPin size={16} /> {t('grievance.pin_location')}
+        <Card className="p-6 shadow-md border-0">
+          <label className="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2">
+            <MapPin size={18} className="text-primary" /> {t('grievance.pin_location')}
           </label>
-          <div className="h-64 rounded-2xl overflow-hidden border border-outline-variant/50">
+          <p className="text-xs text-on-surface-variant mb-3">
+            Tap the map or use your current location to pinpoint the issue exactly.
+          </p>
+          <div className="h-72 rounded-2xl overflow-hidden border border-outline-variant/50 shadow-inner">
             <MapContainer center={mapCenter} zoom={14} className="h-full w-full">
               <TileLayer url={TILE_URLS.light} attribution={TILE_ATTRIBUTION} />
               <LocationPicker position={pin || geoPos} onPositionChange={setPin} />
             </MapContainer>
           </div>
           {(pin || geoPos) && (
-            <p className="text-xs text-on-surface-variant mt-1">
+            <p className="text-sm font-medium text-on-surface mt-3 flex items-center justify-center gap-2 bg-surface-container py-2 rounded-xl">
               📍 {(pin || geoPos).lat.toFixed(5)}, {(pin || geoPos).lng.toFixed(5)}
             </p>
           )}
-        </div>
+        </Card>
 
-        <Button type="submit" size="lg" className="w-full">
-          <Send size={18} />
-          {t('grievance.submit')}
+        <Button type="submit" size="lg" className="w-full shadow-lg text-lg py-4">
+          <Send size={20} />
+          Submit Grievance
         </Button>
       </form>
     </div>

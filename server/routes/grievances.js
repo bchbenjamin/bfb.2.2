@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { readFile } from 'fs/promises';
 import sql from '../db/pool.js';
 import { authenticate } from '../middleware/auth.js';
 import { roleGuard } from '../middleware/roleGuard.js';
@@ -8,32 +7,76 @@ import { categorizeGrievance, verifyMedia, verifyResolution } from '../services/
 import { checkSpatialBuffer } from '../services/spatial.js';
 import { checkDeadline } from '../services/verification.js';
 import { STATUS, VERIFICATION_WINDOW_HOURS } from '../utils/constants.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
 // GET /api/grievances/map — Lightweight data for map markers
 router.get('/map', async (req, res, next) => {
   try {
+    logger.debug('Fetching map grievances');
     const result = await sql`
       SELECT id, latitude, longitude, ai_category, ai_priority, status, title, impact_count
       FROM grievances
-      WHERE status != ${STATUS.RESOLVED_FINAL}
       ORDER BY created_at DESC
       LIMIT 1000
     `;
+    logger.info('Map data returned', { count: result.length });
     res.json(result);
   } catch (err) {
+    logger.error('Map query failed', { error: err.message });
     next(err);
   }
 });
+
+// POST /api/grievances/analyze — AI categorization preview (no save)
+router.post('/analyze', authenticate, async (req, res, next) => {
+  try {
+    const { raw_description } = req.body;
+    logger.info('Analyze request', { userId: req.user.id });
+
+    if (!raw_description?.trim()) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+
+    const aiResult = await categorizeGrievance(raw_description);
+    logger.info('Analyze result', { category: aiResult.category });
+    res.json(aiResult);
+  } catch (err) {
+    logger.error('Analyze failed', { error: err.message });
+    next(err);
+  }
+});
+
+// POST /api/grievances/verify-media — Backend-routed media verification
+router.post('/verify-media', authenticate, upload.single('media'), async (req, res, next) => {
+  try {
+    const { category, description } = req.body;
+    logger.info('Verify-media request', { userId: req.user.id, category });
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Image file is required' });
+    }
+
+    const imageBase64 = req.file.buffer.toString('base64');
+    const verification = await verifyMedia(imageBase64, req.file.mimetype, description || category);
+    logger.info('Verify-media result', { matches: verification.matches_description });
+    res.json(verification);
+  } catch (err) {
+    logger.error('Verify-media failed', { error: err.message });
+    next(err);
+  }
+});
+
 
 // GET /api/grievances — List with filters and sorting
 router.get('/', async (req, res, next) => {
   try {
     const { status, category, ward, sort = 'impact', page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
+    logger.debug('Listing grievances', { status, category, ward, sort, page, limit });
 
-    let query = `SELECT g.*, u.name as user_name FROM grievances g JOIN users u ON g.user_id = u.id WHERE 1=1`;
+    let query = `SELECT g.* FROM grievances g WHERE 1=1`;
     const params = [];
     let paramIndex = 1;
 
@@ -79,6 +122,7 @@ router.get('/', async (req, res, next) => {
     }
     const countResult = await sql(countQuery, countParams);
 
+    logger.info('Grievances listed', { returned: result.length, total: countResult[0].total });
     res.json({
       grievances: result,
       total: countResult[0].total,
@@ -86,6 +130,7 @@ router.get('/', async (req, res, next) => {
       totalPages: Math.ceil(countResult[0].total / parseInt(limit)),
     });
   } catch (err) {
+    logger.error('Grievance list query failed', { error: err.message });
     next(err);
   }
 });
@@ -93,14 +138,15 @@ router.get('/', async (req, res, next) => {
 // GET /api/grievances/:id — Single grievance with lazy deadline check
 router.get('/:id', async (req, res, next) => {
   try {
+    logger.debug('Fetching grievance', { id: req.params.id });
     const result = await sql`
-      SELECT g.*, u.name as user_name
+      SELECT g.*
       FROM grievances g
-      JOIN users u ON g.user_id = u.id
       WHERE g.id = ${req.params.id}
     `;
 
     if (!result[0]) {
+      logger.warn('Grievance not found', { id: req.params.id });
       return res.status(404).json({ error: 'Grievance not found' });
     }
 
@@ -116,7 +162,7 @@ router.get('/:id', async (req, res, next) => {
       ORDER BY rp.created_at DESC
     `;
 
-    // Get upvote count and check if current user upvoted
+    // Get upvote count
     const upvoteInfo = await sql`
       SELECT COUNT(*)::int as count FROM upvotes WHERE grievance_id = ${req.params.id}
     `;
@@ -127,6 +173,7 @@ router.get('/:id', async (req, res, next) => {
       upvotes: upvoteInfo[0].count,
     });
   } catch (err) {
+    logger.error('Grievance fetch failed', { id: req.params.id, error: err.message });
     next(err);
   }
 });
@@ -135,32 +182,30 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', authenticate, upload.single('media'), async (req, res, next) => {
   try {
     const { raw_description, latitude, longitude } = req.body;
+    logger.info('Creating grievance', { userId: req.user.id, hasMedia: !!req.file });
 
     if (!raw_description || !latitude || !longitude) {
+      logger.warn('Grievance creation rejected: missing fields');
       return res.status(400).json({ error: 'Description, latitude, and longitude are required' });
     }
 
     // AI categorization
+    logger.debug('Running AI categorization');
     const aiResult = await categorizeGrievance(raw_description);
+    logger.info('AI categorization result', { category: aiResult.category, priority: aiResult.priority });
 
-    // Handle media upload
+    // Handle media upload (always memory buffer)
     let mediaUrl = null;
     let mediaVerified = false;
     if (req.file) {
-      if (process.env.NODE_ENV === 'production') {
-        // In production, store base64 in DB
-        mediaUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      } else {
-        mediaUrl = `/uploads/${req.file.filename}`;
-      }
+      mediaUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      logger.debug('Media uploaded to memory', { size: req.file.size, mimetype: req.file.mimetype });
 
       // Verify media matches description
-      const imageBase64 = req.file.buffer
-        ? req.file.buffer.toString('base64')
-        : await readFile(req.file.path).then(buf => buf.toString('base64'));
-
+      const imageBase64 = req.file.buffer.toString('base64');
       const verification = await verifyMedia(imageBase64, req.file.mimetype, raw_description);
       mediaVerified = verification.matches_description;
+      logger.info('Media verification result', { mediaVerified });
     }
 
     // Insert grievance
@@ -179,6 +224,7 @@ router.post('/', authenticate, upload.single('media'), async (req, res, next) =>
     `;
 
     const grievance = result[0];
+    logger.info('Grievance created', { grievanceId: grievance.id, category: aiResult.category });
 
     // Spatial buffer check — real-time anomaly detection
     const spatialResult = await checkSpatialBuffer(
@@ -194,6 +240,7 @@ router.post('/', authenticate, upload.single('media'), async (req, res, next) =>
       spatial_alert: spatialResult.isAlert ? spatialResult : null,
     });
   } catch (err) {
+    logger.error('Grievance creation failed', { error: err.message, stack: err.stack });
     next(err);
   }
 });
@@ -201,7 +248,8 @@ router.post('/', authenticate, upload.single('media'), async (req, res, next) =>
 // POST /api/grievances/:id/upvote — "I'm affected too"
 router.post('/:id/upvote', authenticate, async (req, res, next) => {
   try {
-    // Atomic upsert + increment using CTE
+    logger.info('Upvote attempt', { grievanceId: req.params.id, userId: req.user.id });
+
     const result = await sql`
       WITH inserted AS (
         INSERT INTO upvotes (grievance_id, user_id)
@@ -216,16 +264,18 @@ router.post('/:id/upvote', authenticate, async (req, res, next) => {
     `;
 
     if (!result[0]) {
-      // Either already upvoted or grievance not found
       const existing = await sql`SELECT impact_count FROM grievances WHERE id = ${req.params.id}`;
       if (!existing[0]) {
         return res.status(404).json({ error: 'Grievance not found' });
       }
+      logger.debug('Already upvoted', { grievanceId: req.params.id, userId: req.user.id });
       return res.json({ impact_count: existing[0].impact_count, already_upvoted: true });
     }
 
+    logger.info('Upvote recorded', { grievanceId: req.params.id, newCount: result[0].impact_count });
     res.json({ impact_count: result[0].impact_count, already_upvoted: false });
   } catch (err) {
+    logger.error('Upvote failed', { error: err.message });
     next(err);
   }
 });
@@ -233,6 +283,8 @@ router.post('/:id/upvote', authenticate, async (req, res, next) => {
 // POST /api/grievances/:id/resolve — Officer uploads proof
 router.post('/:id/resolve', authenticate, roleGuard('officer', 'admin'), upload.single('proof'), async (req, res, next) => {
   try {
+    logger.info('Resolution attempt', { grievanceId: req.params.id, officerId: req.user.id });
+
     if (!req.file) {
       return res.status(400).json({ error: 'Proof photo is required' });
     }
@@ -244,28 +296,25 @@ router.post('/:id/resolve', authenticate, roleGuard('officer', 'admin'), upload.
     }
     const grievance = grievanceResult[0];
 
-    // Upload proof photo
-    let proofUrl;
-    if (process.env.NODE_ENV === 'production') {
-      proofUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    } else {
-      proofUrl = `/uploads/${req.file.filename}`;
-    }
+    // Upload proof photo (always memory buffer)
+    const proofUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
     // AI verification if original has media
     let aiMatchScore = null;
-    if (grievance.media_url && !grievance.media_url.startsWith('data:')) {
+    if (grievance.media_url && grievance.media_url.startsWith('data:')) {
       try {
-        const originalBuffer = await readFile(grievance.media_url.replace(/^\//, ''));
-        const proofBuffer = req.file.buffer || await readFile(req.file.path);
+        // Extract base64 from data URI
+        const originalBase64 = grievance.media_url.split(',')[1];
+        const proofBase64 = req.file.buffer.toString('base64');
         const result = await verifyResolution(
-          originalBuffer.toString('base64'), 'image/jpeg',
-          proofBuffer.toString('base64'), req.file.mimetype,
+          originalBase64, 'image/jpeg',
+          proofBase64, req.file.mimetype,
           grievance.raw_description
         );
         aiMatchScore = result.match_score;
+        logger.info('Resolution AI verification', { aiMatchScore });
       } catch (e) {
-        console.error('Resolution verification failed:', e.message);
+        logger.error('Resolution verification failed', { error: e.message });
       }
     }
 
@@ -286,8 +335,10 @@ router.post('/:id/resolve', authenticate, roleGuard('officer', 'admin'), upload.
       RETURNING *
     `;
 
+    logger.info('Grievance marked resolved_pending', { grievanceId: req.params.id });
     res.json({ grievance: updated[0], ai_match_score: aiMatchScore });
   } catch (err) {
+    logger.error('Resolution failed', { error: err.message, stack: err.stack });
     next(err);
   }
 });
@@ -296,6 +347,7 @@ router.post('/:id/resolve', authenticate, roleGuard('officer', 'admin'), upload.
 router.post('/:id/verify', authenticate, async (req, res, next) => {
   try {
     const { verified } = req.body;
+    logger.info('Verification attempt', { grievanceId: req.params.id, verified, userId: req.user.id });
 
     const grievanceResult = await sql`SELECT * FROM grievances WHERE id = ${req.params.id}`;
     if (!grievanceResult[0]) {
@@ -304,10 +356,7 @@ router.post('/:id/verify', authenticate, async (req, res, next) => {
 
     const grievance = grievanceResult[0];
 
-    // Only original filer can verify
-    if (grievance.user_id !== req.user.id) {
-      return res.status(403).json({ error: 'Only the original filer can verify' });
-    }
+    // Any logged-in citizen can verify — no ownership check (anonymous filing)
 
     if (grievance.status !== STATUS.RESOLVED_PENDING) {
       return res.status(400).json({ error: 'Grievance is not pending verification' });
@@ -322,7 +371,6 @@ router.post('/:id/verify', authenticate, async (req, res, next) => {
       RETURNING *
     `;
 
-    // Update proof citizen_verified field
     if (verified) {
       await sql`
         UPDATE resolution_proofs
@@ -331,8 +379,10 @@ router.post('/:id/verify', authenticate, async (req, res, next) => {
       `;
     }
 
+    logger.info('Grievance verification result', { grievanceId: req.params.id, newStatus });
     res.json(updated[0]);
   } catch (err) {
+    logger.error('Verification failed', { error: err.message });
     next(err);
   }
 });
@@ -341,6 +391,8 @@ router.post('/:id/verify', authenticate, async (req, res, next) => {
 router.post('/:id/assign', authenticate, roleGuard('admin'), async (req, res, next) => {
   try {
     const { officer_id } = req.body;
+    logger.info('Assigning officer', { grievanceId: req.params.id, officerId: officer_id });
+
     const updated = await sql`
       UPDATE grievances
       SET officer_id = ${officer_id}, status = ${STATUS.ASSIGNED}, updated_at = NOW()
@@ -350,8 +402,42 @@ router.post('/:id/assign', authenticate, roleGuard('admin'), async (req, res, ne
     if (!updated[0]) {
       return res.status(404).json({ error: 'Grievance not found' });
     }
+
+    logger.info('Officer assigned', { grievanceId: req.params.id, officerId: officer_id });
     res.json(updated[0]);
   } catch (err) {
+    logger.error('Assignment failed', { error: err.message });
+    next(err);
+  }
+});
+
+// PATCH /api/grievances/:id/status — Officer changes status (e.g. to in_progress)
+router.patch('/:id/status', authenticate, roleGuard('officer', 'admin'), async (req, res, next) => {
+  try {
+    const { status: newStatus } = req.body;
+    const allowedStatuses = [STATUS.IN_PROGRESS, STATUS.ASSIGNED];
+
+    if (!allowedStatuses.includes(newStatus)) {
+      return res.status(400).json({ error: `Status must be one of: ${allowedStatuses.join(', ')}` });
+    }
+
+    logger.info('Status change', { grievanceId: req.params.id, newStatus, officerId: req.user.id });
+
+    const updated = await sql`
+      UPDATE grievances
+      SET status = ${newStatus}, officer_id = ${req.user.id}, updated_at = NOW()
+      WHERE id = ${req.params.id}
+      RETURNING *
+    `;
+
+    if (!updated[0]) {
+      return res.status(404).json({ error: 'Grievance not found' });
+    }
+
+    logger.info('Status updated', { grievanceId: req.params.id, newStatus });
+    res.json(updated[0]);
+  } catch (err) {
+    logger.error('Status change failed', { error: err.message });
     next(err);
   }
 });

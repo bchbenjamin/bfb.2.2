@@ -1,4 +1,5 @@
 import sql from '../db/pool.js';
+import { logger } from '../utils/logger.js';
 
 export async function checkDeadline(grievance) {
   if (grievance.status !== 'resolved_pending' || !grievance.verification_deadline) {
@@ -9,6 +10,7 @@ export async function checkDeadline(grievance) {
   const deadline = new Date(grievance.verification_deadline);
 
   if (now > deadline) {
+    logger.info('Verification deadline expired, auto-finalizing', { grievanceId: grievance.id, deadline: deadline.toISOString() });
     const result = await sql`
       UPDATE grievances
       SET status = 'resolved_final', updated_at = NOW()

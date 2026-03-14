@@ -1,70 +1,76 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* M3 Expressive Green Palette — Light Theme */
+/*
+ * M3 Expressive Green Palette
+ * Raw RGB channel values stored in --raw-* variables,
+ * then mapped to Tailwind theme colors via @theme.
+ * This avoids the self-referencing loop where @theme
+ * overwrites the same variable name it's reading from.
+ */
 :root {
-  --color-surface: 255, 251, 255;
-  --color-surface-variant: 254, 250, 235;
-  --color-surface-container: 243, 240, 233;
-  --color-primary: 56, 106, 31;
-  --color-primary-light: 229, 231, 187;
-  --color-primary-container: 205, 220, 170;
-  --color-on-surface: 28, 27, 31;
-  --color-on-surface-variant: 73, 69, 79;
-  --color-on-primary: 255, 255, 255;
-  --color-outline: 121, 116, 126;
-  --color-outline-variant: 196, 199, 172;
-  --color-error: 179, 38, 30;
-  --color-on-error: 255, 255, 255;
-  --color-warning: 206, 147, 0;
-  --color-success: 56, 106, 31;
+  --raw-surface: 252, 253, 246;
+  --raw-surface-variant: 223, 228, 215;
+  --raw-surface-container: 236, 242, 232;
+  --raw-primary: 0, 110, 28;
+  --raw-primary-light: 41, 142, 60;
+  --raw-primary-container: 148, 249, 144;
+  --raw-on-surface: 26, 28, 25;
+  --raw-on-surface-variant: 67, 72, 62;
+  --raw-on-primary: 255, 255, 255;
+  --raw-outline: 115, 121, 110;
+  --raw-outline-variant: 194, 201, 189;
+  --raw-error: 186, 26, 26;
+  --raw-on-error: 255, 255, 255;
+  --raw-warning: 140, 109, 30;
+  --raw-success: 0, 110, 28;
 }
 
-/* Dark AMOLED Theme — system preference only */
+/* Dark AMOLED Theme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-surface: 0, 0, 0;
-    --color-surface-variant: 18, 18, 18;
-    --color-surface-container: 30, 30, 30;
-    --color-primary: 173, 209, 131;
-    --color-primary-light: 56, 106, 31;
-    --color-primary-container: 40, 70, 20;
-    --color-on-surface: 230, 225, 229;
-    --color-on-surface-variant: 196, 199, 172;
-    --color-on-primary: 15, 39, 0;
-    --color-outline: 147, 143, 153;
-    --color-outline-variant: 73, 69, 79;
-    --color-error: 242, 184, 181;
-    --color-on-error: 96, 20, 16;
-    --color-warning: 255, 214, 110;
-    --color-success: 173, 209, 131;
+    --raw-surface: 0, 0, 0;
+    --raw-surface-variant: 26, 33, 22;
+    --raw-surface-container: 10, 14, 8;
+    --raw-primary: 120, 220, 119;
+    --raw-primary-light: 148, 249, 144;
+    --raw-primary-container: 0, 83, 19;
+    --raw-on-surface: 226, 227, 221;
+    --raw-on-surface-variant: 194, 201, 189;
+    --raw-on-primary: 0, 57, 10;
+    --raw-outline: 141, 147, 135;
+    --raw-outline-variant: 67, 72, 62;
+    --raw-error: 255, 180, 171;
+    --raw-on-error: 105, 0, 5;
+    --raw-warning: 252, 205, 120;
+    --raw-success: 120, 220, 119;
   }
 }
 
 @theme {
-  --color-surface: rgb(var(--color-surface));
-  --color-surface-variant: rgb(var(--color-surface-variant));
-  --color-surface-container: rgb(var(--color-surface-container));
-  --color-primary: rgb(var(--color-primary));
-  --color-primary-light: rgb(var(--color-primary-light));
-  --color-primary-container: rgb(var(--color-primary-container));
-  --color-on-surface: rgb(var(--color-on-surface));
-  --color-on-surface-variant: rgb(var(--color-on-surface-variant));
-  --color-on-primary: rgb(var(--color-on-primary));
-  --color-outline: rgb(var(--color-outline));
-  --color-outline-variant: rgb(var(--color-outline-variant));
-  --color-error: rgb(var(--color-error));
-  --color-on-error: rgb(var(--color-on-error));
-  --color-warning: rgb(var(--color-warning));
-  --color-success: rgb(var(--color-success));
+  --color-surface: rgb(var(--raw-surface));
+  --color-surface-variant: rgb(var(--raw-surface-variant));
+  --color-surface-container: rgb(var(--raw-surface-container));
+  --color-primary: rgb(var(--raw-primary));
+  --color-primary-light: rgb(var(--raw-primary-light));
+  --color-primary-container: rgb(var(--raw-primary-container));
+  --color-on-surface: rgb(var(--raw-on-surface));
+  --color-on-surface-variant: rgb(var(--raw-on-surface-variant));
+  --color-on-primary: rgb(var(--raw-on-primary));
+  --color-outline: rgb(var(--raw-outline));
+  --color-outline-variant: rgb(var(--raw-outline-variant));
+  --color-error: rgb(var(--raw-error));
+  --color-on-error: rgb(var(--raw-on-error));
+  --color-warning: rgb(var(--raw-warning));
+  --color-success: rgb(var(--raw-success));
 
   --font-sans: "Noto Sans", "Noto Sans Kannada", system-ui, sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: rgb(var(--color-surface));
-  color: rgb(var(--color-on-surface));
+  background-color: rgb(var(--raw-surface));
+  color: rgb(var(--raw-on-surface));
   margin: 0;
 }
 
@@ -73,21 +79,21 @@ body {
   background-image: url("leaflet/dist/images/marker-icon.png");
 }
 
-/* Leaflet dark mode tile inversion for AMOLED */
+/* Leaflet dark mode controls */
 @media (prefers-color-scheme: dark) {
   .leaflet-control-zoom a {
-    background-color: rgb(30, 30, 30) !important;
-    color: rgb(230, 225, 229) !important;
-    border-color: rgb(73, 69, 79) !important;
+    background-color: rgb(26, 33, 22) !important;
+    color: rgb(226, 227, 221) !important;
+    border-color: rgb(67, 72, 62) !important;
   }
   .leaflet-control-attribution {
     background-color: rgba(0, 0, 0, 0.7) !important;
-    color: rgb(147, 143, 153) !important;
+    color: rgb(141, 147, 135) !important;
   }
   .leaflet-popup-content-wrapper,
   .leaflet-popup-tip {
-    background-color: rgb(30, 30, 30) !important;
-    color: rgb(230, 225, 229) !important;
+    background-color: rgb(26, 33, 22) !important;
+    color: rgb(226, 227, 221) !important;
   }
 }
 
@@ -96,33 +102,33 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgb(var(--color-surface-variant));
+  background: rgb(var(--raw-surface-variant));
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--color-outline));
+  background: rgb(var(--raw-outline));
   border-radius: 4px;
 }
 
-/* MarkerCluster styles */
+/* MarkerCluster styles — M3 Expressive Green */
 .marker-cluster-small {
-  background-color: rgba(229, 231, 187, 0.6) !important;
+  background-color: rgba(148, 249, 144, 0.5) !important;
 }
 .marker-cluster-small div {
-  background-color: rgba(56, 106, 31, 0.8) !important;
+  background-color: rgba(0, 110, 28, 0.85) !important;
   color: white !important;
 }
 .marker-cluster-medium {
-  background-color: rgba(206, 147, 0, 0.6) !important;
+  background-color: rgba(140, 109, 30, 0.5) !important;
 }
 .marker-cluster-medium div {
-  background-color: rgba(206, 147, 0, 0.9) !important;
+  background-color: rgba(140, 109, 30, 0.85) !important;
   color: white !important;
 }
 .marker-cluster-large {
-  background-color: rgba(179, 38, 30, 0.6) !important;
+  background-color: rgba(186, 26, 26, 0.5) !important;
 }
 .marker-cluster-large div {
-  background-color: rgba(179, 38, 30, 0.9) !important;
+  background-color: rgba(186, 26, 26, 0.85) !important;
   color: white !important;
 }
 .marker-cluster div {

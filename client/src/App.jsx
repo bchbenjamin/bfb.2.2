@@ -5,6 +5,7 @@ import ProtectedRoute from './auth/ProtectedRoute.jsx';
 import Layout from './components/layout/Layout.jsx';
 import Spinner from './components/ui/Spinner.jsx';
 import LoginPage from './pages/LoginPage.jsx';
+import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import FilePage from './pages/FilePage.jsx';
 import GrievanceDetailPage from './pages/GrievanceDetailPage.jsx';
@@ -27,11 +28,17 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin" element={<AdminLoginPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/file" element={<FilePage />} />
                 <Route path="/grievance/:id" element={<GrievanceDetailPage />} />
+                <Route path="/admin/dashboard" element={
+                  <ProtectedRoute roles={['officer', 'admin']}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
                 <Route path="/dashboard" element={
                   <ProtectedRoute roles={['admin']}>
                     <AdminDashboard />

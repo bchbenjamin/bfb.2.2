@@ -69,9 +69,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-on-primary font-bold text-2xl">BD</span>
-          </div>
+            <img src="/logo.png" alt="BengaluruDuru Logo" className="w-24 h-24 mx-auto mb-4 object-contain" />
           <h1 className="text-2xl font-bold text-on-surface">{t('app.name')}</h1>
           <p className="text-on-surface-variant mt-1">{t('app.tagline')}</p>
           <div className="mt-3 flex justify-center">
@@ -141,18 +139,7 @@ export default function LoginPage() {
                 onChange={e => update('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
               />
 
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-on-surface-variant">{t('auth.language')}</label>
-                <select
-                  value={form.language_pref}
-                  onChange={e => update('language_pref', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-surface-variant text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                >
-                  {LANGUAGES.map(l => (
-                    <option key={l.code} value={l.code}>{l.nativeLabel} ({l.label})</option>
-                  ))}
-                </select>
-              </div>
+
 
               <Button type="submit" className="w-full" size="lg">
                 {t('auth.send_otp')}
@@ -186,6 +173,15 @@ export default function LoginPage() {
             </form>
           )}
         </Card>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => navigate('/admin')}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Government Official / Admin Access
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
-export const CATEGORIZATION_PROMPT = `You are an AI assistant for BengaluruDuru, a public grievance platform for Bengaluru, Karnataka, India.
+export const CATEGORIZATION_PROMPT = `You are an expert civic grievance AI for BengaluruDuru (Bengaluru, Karnataka, India).
 
-Analyze the following citizen complaint and extract structured information.
+Analyze the following citizen complaint and extract structured information using Natural Language Processing (NLP).
 
-CATEGORIES (pick one):
+CATEGORIES (pick the most relevant ONE):
 - Roads & Footpaths
 - Water Supply
 - Sewage & Drainage
@@ -23,12 +23,15 @@ PRIORITY SCALE:
 4 = Urgent (immediate danger to public)
 5 = Critical (life-threatening/emergency)
 
-Respond with ONLY valid JSON (no markdown, no explanation):
+NLP LOCATION EXTRACTION:
+Carefully read the text and extract any specific locations, landmarks, areas, or street names mentioned (e.g., "near MG Road", "Koramangala 4th block", "opposite to Orion Mall"). If a location is mentioned, return it precisely. If no location is mentioned anywhere in the text, return null.
+
+Respond with ONLY valid JSON (no markdown, no quotes around the json block, no explanation):
 {
   "category": "<category from list above>",
-  "subcategory": "<specific subcategory, e.g. Pothole, Blocked drain>",
+  "subcategory": "<specific subcategory based on the issue, e.g., 'Pothole', 'Overflowing drain', 'Broken streetlight'>",
   "priority": <1-5>,
-  "detected_location": "<location mentioned in text, or null>",
+  "detected_location": "<extracted location string, or null>",
   "suggested_title": "<concise title summarizing the issue, max 80 chars>",
   "is_duplicate": false
 }
