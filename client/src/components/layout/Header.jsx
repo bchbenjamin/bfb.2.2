@@ -41,9 +41,7 @@ export default function Header() {
     <header className="bg-surface border-b border-outline-variant/50 sticky top-0 z-[1100]">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-on-primary font-bold text-sm">BD</span>
-          </div>
+          <img src="/logo.png" alt="BengaluruDuru Logo" className="h-8 w-auto object-contain" />
           <span className="font-semibold text-lg text-on-surface hidden sm:inline">
             {t('app.name')}
           </span>

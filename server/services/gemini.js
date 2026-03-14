@@ -63,7 +63,7 @@ function getModel(schemaKey, schema) {
   if (!models[schemaKey]) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     models[schemaKey] = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         responseMimeType: 'application/json',
         responseSchema: schema,

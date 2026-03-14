@@ -69,9 +69,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-on-primary font-bold text-2xl">BD</span>
-          </div>
+            <img src="/logo.png" alt="BengaluruDuru Logo" className="w-24 h-24 mx-auto mb-4 object-contain" />
           <h1 className="text-2xl font-bold text-on-surface">{t('app.name')}</h1>
           <p className="text-on-surface-variant mt-1">{t('app.tagline')}</p>
           <div className="mt-3 flex justify-center">

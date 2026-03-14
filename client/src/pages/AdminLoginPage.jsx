@@ -46,10 +46,7 @@ export default function AdminLoginPage() {
       style={{ background: 'linear-gradient(135deg, #0a1628 0%, #1a2744 50%, #0d2137 100%)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'linear-gradient(135deg, #1e3a5f, #2d5a87)' }}>
-            <Shield size={32} className="text-white" />
-          </div>
+          <img src="/logo.png" alt="BengaluruDuru Logo" className="w-24 h-24 mx-auto mb-4 object-contain drop-shadow-lg" />
           <h1 className="text-2xl font-bold text-white">{t('app.name')}</h1>
           <p className="text-blue-300 mt-1 text-sm">Government Officer Portal</p>
         </div>
