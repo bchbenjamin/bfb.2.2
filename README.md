@@ -64,21 +64,21 @@ Reporting civic issues like potholes, broken streetlights, or water shortages is
 <details open>
 <summary><b>1. Map-First Citizen Interface / ನಕ್ಷೆ-ಆಧಾರಿತ ನಾಗರಿಕ ಇಂಟರ್ಫೇಸ್ 🗺️</b></summary>
 <br>
-<img src="https://via.placeholder.com/800x400?text=Insert+Map+Screenshot+Here" width="100%" alt="Map Interface" />
+<img src="readme_uploads/Screenshot 2026-03-14 133225.png" width="100%" alt="Map Interface" />
 <em>Citizens can view live neighborhood issues, upvote ("I'm affected too!") to boost priority, or drop a pin to report a new problem. <br> ನಾಗರಿಕರು ನೆರೆಹೊರೆಯ ಸಮಸ್ಯೆಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು, ಆದ್ಯತೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ಅಪ್‌ವೋಟ್ ಮಾಡಬಹುದು ಅಥವಾ ಹೊಸ ಸಮಸ್ಯೆಯನ್ನು ವರದಿ ಮಾಡಬಹುದು.</em>
 </details>
 
 <details open>
 <summary><b>2. Officer Dashboard & Analytics / ಅಧಿಕಾರಿಗಳ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ 📊</b></summary>
 <br>
-<img src="https://via.placeholder.com/800x400?text=Insert+Dashboard+Screenshot+Here" width="100%" alt="Admin Dashboard" />
+<img src="readme_uploads/Screenshot 2026-03-14 130408.png" width="100%" alt="Admin Dashboard" />
 <em>A powerful command center for officials providing intelligent sorting, heatmap toggles, and real-time alerts. <br> ಅಧಿಕಾರಿಗಳಿಗೆ ಸ್ಮಾರ್ಟ್ ವಿಂಗಡಣೆ, ಹೀಟ್‌ಮ್ಯಾಪ್ ಮತ್ತು ನೈಜ-ಸಮಯದ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಒದಗಿಸುವ ಶಕ್ತಿಶಾಲಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್.</em>
 </details>
 
 <details open>
 <summary><b>3. Resolution Verification Engine / ಪರಿಹಾರ ಪರಿಶೀಲನಾ ಎಂಜಿನ್ 📸</b></summary>
 <br>
-<img src="https://via.placeholder.com/800x400?text=Insert+Verification+Screenshot+Here" width="100%" alt="Verification Setup" />
+<img src="readme_uploads/Screenshot 2026-03-14 133318.png" width="100%" alt="Verification Setup" />
 <em>Before and after comparisons powered by AI and human-in-the-loop (Citizen receives a 24-hour window to contest a fix). <br> AI ಮತ್ತು ನಾಗರಿಕರ ಪರಿಶೀಲನೆಯೊಂದಿಗೆ ಮೊದಲು ಮತ್ತು ನಂತರದ ಹೋಲಿಕೆಗಳು (ನಾಗರಿಕರಿಗೆ 24 ಗಂಟೆಗಳ ಕಾಲಾವಕಾಶವಿರುತ್ತದೆ).</em>
 </details>
 
@@ -131,8 +131,6 @@ npm run dev
 
 We built BengaluruDuru because we believe technology should serve the public good. If you found this project interesting, let's connect!
 ತಂತ್ರಜ್ಞಾನವು ಸಾರ್ವಜನಿಕ ಒಳಿತಿಗಾಗಿ ಕೆಲಸ ಮಾಡಬೇಕು ಎಂದು ನಾವು ನಂಬಿರುವುದರಿಂದ ನಾವು ಬೆಂಗಳೂರುದುರು ನಿರ್ಮಿಸಿದ್ದೇವೆ.
-
-<!-- INSTRUCTION: Replace these LinkedIn URLs with your actual profile links! -->
 
 <div align="center">
   <a href="https://www.linkedin.com/posts/bchbenjamin_bengaluru-govtech-datascience-ugcPost-7438483657247432704-wsnl">
