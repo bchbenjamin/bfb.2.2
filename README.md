@@ -29,11 +29,11 @@ TEAM INSTRUCTIONS FOR MEDIA:
 ## 🎬 See it in Action / ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ನೋಡಿ
 
 <div align="center">
-  <h3>
+  <h1>
     <a href="https://bengaluruduru.vercel.app/">
       <img src="https://img.shields.io/badge/Link-to_access_the_project-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
     </a>
-  </h3>
+  </h1>
 </div>
 
 <div align="center">
