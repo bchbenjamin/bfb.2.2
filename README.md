@@ -31,7 +31,7 @@ TEAM INSTRUCTIONS FOR MEDIA:
 <div align="center">
   <h1>
     <a href="https://bengaluruduru.vercel.app/">
-      <img src="https://img.shields.io/badge/Link-to_access_the_project-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
+      <img src="https://img.shields.io/badge/Link_to_access_the_project-ಯೋಜನೆಯನ್ನು_ಪ್ರವೇಶಿಸಲು_ಲಿಂಕ್-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
     </a>
   </h1>
 </div>
