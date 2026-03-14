@@ -90,4 +90,36 @@ router.get('/officers', authenticate, roleGuard('admin'), async (req, res, next)
   }
 });
 
+// GET /api/dashboard/admin-stats — Summary stats for admin dashboard
+router.get('/admin-stats', authenticate, roleGuard('admin', 'officer'), async (req, res, next) => {
+  try {
+    logger.debug('Fetching admin stats');
+
+    const stats = await sql`
+      SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status IN ('open', 'assigned', 'reopened'))::int AS open_count,
+        COUNT(*) FILTER (WHERE status = 'in_progress')::int AS in_progress_count,
+        COUNT(*) FILTER (WHERE status IN ('resolved_pending', 'resolved_final')
+          AND updated_at >= CURRENT_DATE)::int AS resolved_today,
+        ROUND(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 3600)
+          FILTER (WHERE status = 'resolved_final'), 1) AS avg_resolution_hours
+      FROM grievances
+    `;
+
+    const alertCount = await sql`
+      SELECT COUNT(*)::int AS count FROM alerts WHERE resolved_at IS NULL
+    `;
+
+    logger.info('Admin stats returned', { stats: stats[0] });
+    res.json({
+      ...stats[0],
+      active_alerts: alertCount[0].count,
+    });
+  } catch (err) {
+    logger.error('Admin stats query failed', { error: err.message });
+    next(err);
+  }
+});
+
 export default router;

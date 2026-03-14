@@ -77,4 +77,47 @@ router.get('/me', async (req, res, next) => {
   }
 });
 
+// POST /api/auth/admin-login — Email/password login for officers/admins
+router.post('/admin-login', async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    logger.info('Admin login attempt', { email });
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (email !== adminEmail || password !== adminPassword) {
+      logger.warn('Admin login rejected: invalid credentials', { email });
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Upsert officer user using a fixed aadhaar for the admin account
+    const result = await sql`
+      INSERT INTO users (aadhaar_id, name, email, role)
+      VALUES ('999999999999', 'BBMP Officer', ${email}, 'officer')
+      ON CONFLICT (aadhaar_id)
+      DO UPDATE SET email = EXCLUDED.email
+      RETURNING id, name, role, language_pref, ward, email
+    `;
+
+    const user = result[0];
+    logger.info('Admin authenticated', { userId: user.id, role: user.role });
+
+    const token = jwt.sign(
+      { id: user.id, name: user.name, role: user.role, language_pref: user.language_pref },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({ token, user });
+  } catch (err) {
+    logger.error('Admin login failed', { error: err.message, stack: err.stack });
+    next(err);
+  }
+});
+
 export default router;

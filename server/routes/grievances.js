@@ -18,7 +18,6 @@ router.get('/map', async (req, res, next) => {
     const result = await sql`
       SELECT id, latitude, longitude, ai_category, ai_priority, status, title, impact_count
       FROM grievances
-      WHERE status != ${STATUS.RESOLVED_FINAL}
       ORDER BY created_at DESC
       LIMIT 1000
     `;
@@ -30,6 +29,46 @@ router.get('/map', async (req, res, next) => {
   }
 });
 
+// POST /api/grievances/analyze — AI categorization preview (no save)
+router.post('/analyze', authenticate, async (req, res, next) => {
+  try {
+    const { raw_description } = req.body;
+    logger.info('Analyze request', { userId: req.user.id });
+
+    if (!raw_description?.trim()) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+
+    const aiResult = await categorizeGrievance(raw_description);
+    logger.info('Analyze result', { category: aiResult.category });
+    res.json(aiResult);
+  } catch (err) {
+    logger.error('Analyze failed', { error: err.message });
+    next(err);
+  }
+});
+
+// POST /api/grievances/verify-media — Backend-routed media verification
+router.post('/verify-media', authenticate, upload.single('media'), async (req, res, next) => {
+  try {
+    const { category, description } = req.body;
+    logger.info('Verify-media request', { userId: req.user.id, category });
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Image file is required' });
+    }
+
+    const imageBase64 = req.file.buffer.toString('base64');
+    const verification = await verifyMedia(imageBase64, req.file.mimetype, description || category);
+    logger.info('Verify-media result', { matches: verification.matches_description });
+    res.json(verification);
+  } catch (err) {
+    logger.error('Verify-media failed', { error: err.message });
+    next(err);
+  }
+});
+
+
 // GET /api/grievances — List with filters and sorting
 router.get('/', async (req, res, next) => {
   try {
@@ -37,7 +76,7 @@ router.get('/', async (req, res, next) => {
     const offset = (parseInt(page) - 1) * parseInt(limit);
     logger.debug('Listing grievances', { status, category, ward, sort, page, limit });
 
-    let query = `SELECT g.*, u.name as user_name FROM grievances g JOIN users u ON g.user_id = u.id WHERE 1=1`;
+    let query = `SELECT g.* FROM grievances g WHERE 1=1`;
     const params = [];
     let paramIndex = 1;
 
@@ -101,9 +140,8 @@ router.get('/:id', async (req, res, next) => {
   try {
     logger.debug('Fetching grievance', { id: req.params.id });
     const result = await sql`
-      SELECT g.*, u.name as user_name
+      SELECT g.*
       FROM grievances g
-      JOIN users u ON g.user_id = u.id
       WHERE g.id = ${req.params.id}
     `;
 
@@ -318,10 +356,7 @@ router.post('/:id/verify', authenticate, async (req, res, next) => {
 
     const grievance = grievanceResult[0];
 
-    if (grievance.user_id !== req.user.id) {
-      logger.warn('Verification denied: not original filer', { grievanceUserId: grievance.user_id, requestUserId: req.user.id });
-      return res.status(403).json({ error: 'Only the original filer can verify' });
-    }
+    // Any logged-in citizen can verify — no ownership check (anonymous filing)
 
     if (grievance.status !== STATUS.RESOLVED_PENDING) {
       return res.status(400).json({ error: 'Grievance is not pending verification' });
@@ -372,6 +407,37 @@ router.post('/:id/assign', authenticate, roleGuard('admin'), async (req, res, ne
     res.json(updated[0]);
   } catch (err) {
     logger.error('Assignment failed', { error: err.message });
+    next(err);
+  }
+});
+
+// PATCH /api/grievances/:id/status — Officer changes status (e.g. to in_progress)
+router.patch('/:id/status', authenticate, roleGuard('officer', 'admin'), async (req, res, next) => {
+  try {
+    const { status: newStatus } = req.body;
+    const allowedStatuses = [STATUS.IN_PROGRESS, STATUS.ASSIGNED];
+
+    if (!allowedStatuses.includes(newStatus)) {
+      return res.status(400).json({ error: `Status must be one of: ${allowedStatuses.join(', ')}` });
+    }
+
+    logger.info('Status change', { grievanceId: req.params.id, newStatus, officerId: req.user.id });
+
+    const updated = await sql`
+      UPDATE grievances
+      SET status = ${newStatus}, officer_id = ${req.user.id}, updated_at = NOW()
+      WHERE id = ${req.params.id}
+      RETURNING *
+    `;
+
+    if (!updated[0]) {
+      return res.status(404).json({ error: 'Grievance not found' });
+    }
+
+    logger.info('Status updated', { grievanceId: req.params.id, newStatus });
+    res.json(updated[0]);
+  } catch (err) {
+    logger.error('Status change failed', { error: err.message });
     next(err);
   }
 });

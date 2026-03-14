@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import { ArrowLeft, MapPin, Clock, User } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, User, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { apiFetch } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.js';
 import GrievanceTimeline from '../components/grievance/GrievanceTimeline.jsx';
@@ -18,6 +18,35 @@ import { getStatusColor, getPriorityColor } from '../utils/statusColors.js';
 import { getCategoryInfo } from '../utils/categories.js';
 import { TILE_URLS, TILE_ATTRIBUTION } from '../utils/constants.js';
 
+function CountdownTimer({ deadline }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    function update() {
+      const now = Date.now();
+      const end = new Date(deadline).getTime();
+      const diff = end - now;
+      if (diff <= 0) {
+        setTimeLeft('Expired');
+        return;
+      }
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      setTimeLeft(`${hours}h ${minutes}m remaining`);
+    }
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [deadline]);
+
+  return (
+    <span className="flex items-center gap-1.5 text-sm font-medium">
+      <Clock size={16} className="text-warning" />
+      {timeLeft}
+    </span>
+  );
+}
+
 export default function GrievanceDetailPage() {
   const { id } = useParams();
   const { t } = useTranslation();
@@ -26,6 +55,8 @@ export default function GrievanceDetailPage() {
   const [grievance, setGrievance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [reopenReason, setReopenReason] = useState('');
+  const [showReopenInput, setShowReopenInput] = useState(false);
 
   useEffect(() => {
     apiFetch(`/api/grievances/${id}`)
@@ -37,11 +68,17 @@ export default function GrievanceDetailPage() {
   async function handleVerify(verified) {
     setActionLoading(true);
     try {
+      const body = { verified };
+      if (!verified && reopenReason) {
+        body.reason = reopenReason;
+      }
       const updated = await apiFetch(`/api/grievances/${id}/verify`, {
         method: 'POST',
-        body: JSON.stringify({ verified }),
+        body: JSON.stringify(body),
       });
       setGrievance(prev => ({ ...prev, ...updated }));
+      setShowReopenInput(false);
+      setReopenReason('');
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,15 +93,34 @@ export default function GrievanceDetailPage() {
   const priority = getPriorityColor(grievance.ai_priority);
   const category = getCategoryInfo(grievance.ai_category);
   const isOwner = user?.id === grievance.user_id;
-  const canVerify = isOwner && grievance.status === 'resolved_pending';
+  const canVerify = user && grievance.status === 'resolved_pending';
   const deadline = grievance.verification_deadline ? new Date(grievance.verification_deadline) : null;
-  const hoursLeft = deadline ? Math.max(0, Math.round((deadline - new Date()) / 3600000)) : 0;
+  const latestProof = grievance.proofs?.[0];
 
   return (
     <div className="max-w-4xl mx-auto p-4 py-6">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-on-surface-variant hover:text-on-surface mb-4 text-sm">
         <ArrowLeft size={18} /> {t('common.back')}
       </button>
+
+      {/* Pending verification banner */}
+      {grievance.status === 'resolved_pending' && (
+        <div className="mb-6 p-4 rounded-2xl border-2"
+          style={{
+            background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(234, 179, 8, 0.15))',
+            borderColor: 'rgba(234, 179, 8, 0.4)',
+          }}>
+          <div className="flex items-center gap-3 mb-2">
+            <AlertTriangle size={24} className="text-warning" />
+            <div>
+              <h3 className="font-semibold text-on-surface">
+                {isOwner ? 'Officer has uploaded proof — Please verify!' : 'Pending Citizen Verification'}
+              </h3>
+              {deadline && <CountdownTimer deadline={deadline} />}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
@@ -90,7 +146,35 @@ export default function GrievanceDetailPage() {
             <p className="text-on-surface-variant leading-relaxed">{grievance.raw_description}</p>
           </Card>
 
-          {grievance.media_url && (
+          {/* Before/After Photo Comparison */}
+          {grievance.status === 'resolved_pending' && latestProof && (
+            <Card className="p-5">
+              <h3 className="font-semibold text-on-surface mb-4">📸 Before & After Comparison</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wider">Before (Filed)</p>
+                  {grievance.media_url ? (
+                    <img src={grievance.media_url} alt="Before" className="w-full rounded-xl border border-outline-variant/50 object-cover max-h-56" />
+                  ) : (
+                    <div className="w-full h-48 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant text-sm border border-outline-variant/50">
+                      No photo submitted
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wider">After (Officer Proof)</p>
+                  <img src={latestProof.photo_url} alt="After" className="w-full rounded-xl border border-outline-variant/50 object-cover max-h-56" />
+                  {latestProof.ai_match_score != null && (
+                    <Badge color={latestProof.ai_match_score > 0.6 ? 'success' : 'warning'} className="mt-2">
+                      AI Match: {Math.round(latestProof.ai_match_score * 100)}%
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {grievance.media_url && grievance.status !== 'resolved_pending' && (
             <MediaViewer url={grievance.media_url} verified={grievance.media_verified} />
           )}
 
@@ -113,8 +197,8 @@ export default function GrievanceDetailPage() {
             </div>
           </Card>
 
-          {/* Resolution proofs */}
-          {grievance.proofs?.length > 0 && (
+          {/* Resolution proofs (when NOT in pending verification — those are shown in before/after) */}
+          {grievance.proofs?.length > 0 && grievance.status !== 'resolved_pending' && (
             <div className="space-y-4">
               <h3 className="font-semibold text-on-surface">Resolution Proof</h3>
               {grievance.proofs.map(proof => (
@@ -123,21 +207,45 @@ export default function GrievanceDetailPage() {
             </div>
           )}
 
-          {/* Verify/Reopen buttons */}
+          {/* Verify/Reopen buttons for citizen */}
           {canVerify && (
             <Card className="p-5">
-              <div className="flex items-center gap-2 mb-4 text-sm text-on-surface-variant">
-                <Clock size={16} />
-                {t('grievance.verification_window', { hours: hoursLeft })}
-              </div>
-              <div className="flex gap-3">
-                <Button onClick={() => handleVerify(true)} disabled={actionLoading} className="flex-1">
-                  {t('grievance.verify')}
-                </Button>
-                <Button variant="danger" onClick={() => handleVerify(false)} disabled={actionLoading} className="flex-1">
-                  {t('grievance.reopen')}
-                </Button>
-              </div>
+              <h3 className="font-semibold text-on-surface mb-3">Verify Resolution</h3>
+              {deadline && (
+                <div className="mb-4">
+                  <CountdownTimer deadline={deadline} />
+                </div>
+              )}
+
+              {showReopenInput ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-on-surface-variant">What's still wrong? Help the officer understand:</p>
+                  <textarea
+                    value={reopenReason}
+                    onChange={e => setReopenReason(e.target.value)}
+                    placeholder="Describe why the issue is not fixed..."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-variant text-on-surface border border-outline-variant focus:border-primary focus:outline-none text-sm"
+                  />
+                  <div className="flex gap-3">
+                    <Button variant="outlined" onClick={() => setShowReopenInput(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button variant="danger" onClick={() => handleVerify(false)} disabled={actionLoading || !reopenReason.trim()} className="flex-1">
+                      <XCircle size={16} /> Reopen Issue
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <Button onClick={() => handleVerify(true)} disabled={actionLoading} className="flex-1">
+                    <CheckCircle size={16} /> Fix Looks Good
+                  </Button>
+                  <Button variant="danger" onClick={() => setShowReopenInput(true)} disabled={actionLoading} className="flex-1">
+                    <XCircle size={16} /> Issue Not Fixed
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
         </div>
@@ -159,8 +267,7 @@ export default function GrievanceDetailPage() {
           <Card className="p-5 space-y-3 text-sm">
             <div className="flex items-center gap-2 text-on-surface-variant">
               <User size={16} />
-              <span>{t('grievance.filed_by')}:</span>
-              <span className="font-medium text-on-surface">{grievance.user_name}</span>
+              <span>{t('grievance.filed_anonymously')}</span>
             </div>
             <div className="text-on-surface-variant">
               <Clock size={14} className="inline mr-1" />

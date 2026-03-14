@@ -186,6 +186,15 @@ export default function LoginPage() {
             </form>
           )}
         </Card>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => navigate('/admin')}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Government Official / Admin Access
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Upload, Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Camera, CheckCircle, AlertCircle, Play, Clock } from 'lucide-react';
 import { apiFetch } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.js';
 import GrievanceCard from '../components/grievance/GrievanceCard.jsx';
@@ -13,6 +14,7 @@ import Badge from '../components/ui/Badge.jsx';
 export default function OfficerView() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [grievances, setGrievances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -27,7 +29,7 @@ export default function OfficerView() {
       .then(data => {
         const mine = data.grievances.filter(g =>
           g.officer_id === user?.id ||
-          ['open', 'assigned'].includes(g.status)
+          ['open', 'assigned', 'in_progress'].includes(g.status)
         );
         setGrievances(mine);
       })
@@ -40,6 +42,20 @@ export default function OfficerView() {
     if (file) {
       setProofFile(file);
       setProofPreview(URL.createObjectURL(file));
+    }
+  }
+
+  async function handleSetInProgress(grievanceId) {
+    try {
+      await apiFetch(`/api/grievances/${grievanceId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'in_progress' }),
+      });
+      setGrievances(prev => prev.map(g =>
+        g.id === grievanceId ? { ...g, status: 'in_progress', officer_id: user?.id } : g
+      ));
+    } catch (err) {
+      console.error('Set in progress failed:', err);
     }
   }
 
@@ -75,7 +91,8 @@ export default function OfficerView() {
 
   if (loading) return <div className="flex justify-center py-20"><Spinner size="lg" /></div>;
 
-  const assigned = grievances.filter(g => ['assigned', 'in_progress'].includes(g.status));
+  const assigned = grievances.filter(g => ['assigned'].includes(g.status));
+  const inProgress = grievances.filter(g => g.status === 'in_progress');
   const pending = grievances.filter(g => g.status === 'resolved_pending');
   const open = grievances.filter(g => g.status === 'open');
 
@@ -83,11 +100,30 @@ export default function OfficerView() {
     <div className="max-w-4xl mx-auto p-4 py-6 space-y-6">
       <h1 className="text-2xl font-bold text-on-surface">{t('officer.title')}</h1>
 
-      {assigned.length === 0 && open.length === 0 && (
+      {assigned.length === 0 && open.length === 0 && inProgress.length === 0 && (
         <Card className="p-8 text-center">
           <CheckCircle size={48} className="mx-auto mb-4 text-success opacity-50" />
           <p className="text-on-surface-variant">{t('officer.no_assignments')}</p>
         </Card>
+      )}
+
+      {/* In Progress grievances */}
+      {inProgress.length > 0 && (
+        <div>
+          <h2 className="font-semibold text-on-surface mb-3 flex items-center gap-2">
+            <Play size={18} className="text-primary" /> In Progress ({inProgress.length})
+          </h2>
+          <div className="space-y-3">
+            {inProgress.map(g => (
+              <div key={g.id} className="flex items-center gap-3">
+                <div className="flex-1"><GrievanceCard grievance={g} /></div>
+                <Button size="sm" onClick={() => setSelectedId(g.id)}>
+                  <Camera size={16} /> Resolve
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* My assigned grievances */}
@@ -100,9 +136,14 @@ export default function OfficerView() {
             {assigned.map(g => (
               <div key={g.id} className="flex items-center gap-3">
                 <div className="flex-1"><GrievanceCard grievance={g} /></div>
-                <Button size="sm" onClick={() => setSelectedId(g.id)}>
-                  <Camera size={16} /> Resolve
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button size="sm" variant="outlined" onClick={() => handleSetInProgress(g.id)}>
+                    <Play size={14} /> Start
+                  </Button>
+                  <Button size="sm" onClick={() => setSelectedId(g.id)}>
+                    <Camera size={14} /> Resolve
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -117,9 +158,14 @@ export default function OfficerView() {
             {open.map(g => (
               <div key={g.id} className="flex items-center gap-3">
                 <div className="flex-1"><GrievanceCard grievance={g} /></div>
-                <Button size="sm" onClick={() => setSelectedId(g.id)}>
-                  <Camera size={16} /> Resolve
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button size="sm" variant="outlined" onClick={() => handleSetInProgress(g.id)}>
+                    <Play size={14} /> Start
+                  </Button>
+                  <Button size="sm" onClick={() => setSelectedId(g.id)}>
+                    <Camera size={14} /> Resolve
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -129,7 +175,9 @@ export default function OfficerView() {
       {/* Pending verification */}
       {pending.length > 0 && (
         <div>
-          <h2 className="font-semibold text-on-surface mb-3">Pending Citizen Verification ({pending.length})</h2>
+          <h2 className="font-semibold text-on-surface mb-3 flex items-center gap-2">
+            <Clock size={18} /> Pending Citizen Verification ({pending.length})
+          </h2>
           <div className="space-y-3">
             {pending.map(g => <GrievanceCard key={g.id} grievance={g} />)}
           </div>
