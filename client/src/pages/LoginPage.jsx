@@ -139,18 +139,7 @@ export default function LoginPage() {
                 onChange={e => update('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
               />
 
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-on-surface-variant">{t('auth.language')}</label>
-                <select
-                  value={form.language_pref}
-                  onChange={e => update('language_pref', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-surface-variant text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                >
-                  {LANGUAGES.map(l => (
-                    <option key={l.code} value={l.code}>{l.nativeLabel} ({l.label})</option>
-                  ))}
-                </select>
-              </div>
+
 
               <Button type="submit" className="w-full" size="lg">
                 {t('auth.send_otp')}

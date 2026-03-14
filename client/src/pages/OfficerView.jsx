@@ -45,7 +45,8 @@ export default function OfficerView() {
     }
   }
 
-  async function handleSetInProgress(grievanceId) {
+  async function handleSetInProgress(e, grievanceId) {
+    if (e) e.stopPropagation();
     try {
       await apiFetch(`/api/grievances/${grievanceId}/status`, {
         method: 'PATCH',
@@ -137,10 +138,10 @@ export default function OfficerView() {
               <div key={g.id} className="flex items-center gap-3">
                 <div className="flex-1"><GrievanceCard grievance={g} /></div>
                 <div className="flex flex-col gap-2">
-                  <Button size="sm" variant="outlined" onClick={() => handleSetInProgress(g.id)}>
+                  <Button size="sm" variant="outlined" onClick={(e) => handleSetInProgress(e, g.id)}>
                     <Play size={14} /> Start
                   </Button>
-                  <Button size="sm" onClick={() => setSelectedId(g.id)}>
+                  <Button size="sm" onClick={(e) => { e.stopPropagation(); setSelectedId(g.id); }}>
                     <Camera size={14} /> Resolve
                   </Button>
                 </div>
@@ -159,10 +160,10 @@ export default function OfficerView() {
               <div key={g.id} className="flex items-center gap-3">
                 <div className="flex-1"><GrievanceCard grievance={g} /></div>
                 <div className="flex flex-col gap-2">
-                  <Button size="sm" variant="outlined" onClick={() => handleSetInProgress(g.id)}>
+                  <Button size="sm" variant="outlined" onClick={(e) => handleSetInProgress(e, g.id)}>
                     <Play size={14} /> Start
                   </Button>
-                  <Button size="sm" onClick={() => setSelectedId(g.id)}>
+                  <Button size="sm" onClick={(e) => { e.stopPropagation(); setSelectedId(g.id); }}>
                     <Camera size={14} /> Resolve
                   </Button>
                 </div>
